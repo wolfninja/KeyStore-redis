@@ -1,0 +1,85 @@
+apply plugin: 'java'
+apply plugin: 'eclipse-wtp'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+version = '1.0.0'
+group 'com.wolfninja.keystore'
+ext.packaging = 'jar'
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+def isDevBuild
+def isCiBuild
+def isReleaseBuild
+
+dependencies {
+	compile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT'
+	compile 'com.google.guava:guava:18.0'
+	compile 'com.google.code.findbugs:jsr305:3.0.0'
+	compile 'redis.clients:jedis:2.6.1'
+	testCompile 'org.testng:testng:6.8.8'
+	testCompile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT:tests@jar'
+	testCompile 'com.fiftyonred:mock-jedis:0.4.0'
+	testCompile 'org.easymock:easymock:3.3'
+	testCompile 'org.powermock:powermock-module-testng:1.6.0'
+	testCompile 'org.powermock:powermock-api-easymock:1.6.0'
+}
+
+sourceSets {
+	integTest {
+		compileClasspath += main.output + test.output
+		runtimeClasspath += main.output + test.output
+	}
+}
+
+configurations {
+	integTestCompile.extendsFrom testCompile
+	integTestRuntime.extendsFrom testRuntime
+}
+
+task integTest(type: Test) {
+	testClassesDir = sourceSets.integTest.output.classesDir
+	classpath = sourceSets.integTest.runtimeClasspath
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+	classifier = 'javadoc'
+	from javadoc.destinationDir
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = 'sources'
+	from sourceSets.main.allSource
+}
+
+test.useTestNG()
+integTest.useTestNG()
+
+artifacts {
+	archives jar
+
+	archives javadocJar
+	archives sourcesJar
+}
+
+if(hasProperty("release")) {
+	isReleaseBuild = true
+} else if (hasProperty("ci")) {
+	isCiBuild = true
+	version += "-SNAPSHOT"
+} else {
+	isDevBuild = true
+	version += "-SNAPSHOT"
+}
+
+uploadArchives {
+	repositories {
+		if(isDevBuild) {
+			mavenLocal()
+		}
+	}
+}

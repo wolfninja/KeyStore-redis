@@ -1,0 +1,14 @@
+syntax:regexp
+
+^.project$
+
+\.gradle\/
+\.classpath$
+\.project$
+\.orig$
+\.settings\/
+\/Main.java$
+^bin\/
+^build\/
+\/target\/
+^test-output\/
