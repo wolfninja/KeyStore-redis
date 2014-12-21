@@ -16,8 +16,9 @@ import com.wolfninja.keystore.api.Keyspace;
  */
 public class RedisKeyspace implements Keyspace {
 
-	private final String keyspaceName;
 	private final JedisPool jedisPool;
+
+	private final String keyspaceName;
 
 	/**
 	 * Constructor
@@ -61,6 +62,24 @@ public class RedisKeyspace implements Keyspace {
 	public boolean delete(final String key) {
 		Preconditions.checkNotNull(key, "Key should be provided");
 		return jedisInstance().hdel(keyspaceName, key) == 1;
+	}
+
+	@Override
+	public boolean deletes(final String key, final long version) {
+		// FIXME needs transaction support
+		Preconditions.checkNotNull(key, "Key should be provided");
+
+		final String existingValue = jedisInstance().hget(keyspaceName, key);
+
+		if (existingValue != null) {
+			final int existingVersion = existingValue.hashCode();
+			if (existingVersion == version) {
+				jedisInstance().hdel(keyspaceName, key);
+				return true;
+			}
+		}
+		return false;
+
 	}
 
 	@Override
