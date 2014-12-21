@@ -8,9 +8,9 @@ import com.fiftyonred.mock_jedis.MockJedisPool;
 import com.wolfninja.keystore.api.BaseKeyValueStoreAdapterTest;
 
 @Test
-public class RedisAdapterContractTest extends BaseKeyValueStoreAdapterTest {
+public class RedisAdapterContractIntegrationTest extends BaseKeyValueStoreAdapterTest {
 
-	public RedisAdapterContractTest() {
+	public RedisAdapterContractIntegrationTest() {
 		super(new RedisAdapter(new MockJedisPool(new JedisPoolConfig(), "127.0.0.1")));
 	}
 }
