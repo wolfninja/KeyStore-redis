@@ -71,7 +71,14 @@ public class RedisKeyspace implements Keyspace {
 	}
 
 	@Override
-	public Optional<KeyValue> get(final String key) {
+	public Optional<String> get(final String key) {
+		Preconditions.checkNotNull(key, "Key should be provided");
+
+		return Optional.fromNullable(jedisInstance().hget(keyspaceName, key));
+	}
+
+	@Override
+	public Optional<KeyValue> gets(final String key) {
 		Preconditions.checkNotNull(key, "Key should be provided");
 
 		final String value = jedisInstance().hget(keyspaceName, key);

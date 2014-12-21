@@ -69,7 +69,6 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 }
 
-
 artifacts {
 	archives jar
 
