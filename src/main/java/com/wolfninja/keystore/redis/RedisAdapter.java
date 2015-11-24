@@ -1,11 +1,12 @@
 package com.wolfninja.keystore.redis;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+import java.util.Objects;
 
-import com.google.common.base.Preconditions;
 import com.wolfninja.keystore.api.KeyValueStoreAdapter;
 import com.wolfninja.keystore.api.Keyspace;
+
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 /**
  * KeyValueStoreAdapter instance for Redis
@@ -37,13 +38,13 @@ public class RedisAdapter implements KeyValueStoreAdapter {
 	 *            Configured {@link JedisPool} instance, not null
 	 */
 	protected RedisAdapter(final JedisPool jedisPool) {
-		Preconditions.checkNotNull(jedisPool, "JedisPool must not be null");
+		Objects.requireNonNull(jedisPool, "JedisPool must not be null");
 		this.jedisPool = jedisPool;
 	}
 
 	@Override
 	public Keyspace getKeyspace(final String keyspaceName) {
-		Preconditions.checkNotNull(keyspaceName, "KeyspaceName must not be null");
+		Objects.requireNonNull(keyspaceName, "KeyspaceName must not be null");
 		return new RedisKeyspace(keyspaceName, jedisPool);
 	}
 

@@ -18,9 +18,9 @@ def isReleaseBuild
 
 dependencies {
 	compile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT'
-	compile 'com.google.guava:guava:18.0'
 	compile 'com.google.code.findbugs:jsr305:3.0.0'
-	compile 'redis.clients:jedis:2.6.1'
+	compile 'redis.clients:jedis:2.8.0'
+
 	testCompile 'org.testng:testng:6.8.8'
 	testCompile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT:tests@jar'
 	testCompile 'com.fiftyonred:mock-jedis:0.4.0'

@@ -3,8 +3,9 @@ package com.wolfninja.keystore.redis;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
+import java.util.Objects;
+import java.util.Optional;
+
 import com.wolfninja.keystore.api.KeyValue;
 import com.wolfninja.keystore.api.Keyspace;
 
@@ -34,8 +35,8 @@ public class RedisKeyspace implements Keyspace {
 
 	@Override
 	public boolean add(final String key, final String value) {
-		Preconditions.checkNotNull(key, "Key should be provided");
-		Preconditions.checkNotNull(value, "Value should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
+		Objects.requireNonNull(value, "Value should be provided");
 
 		return jedisInstance().hsetnx(keyspaceName, key, value) == 1;
 	}
@@ -43,8 +44,8 @@ public class RedisKeyspace implements Keyspace {
 	@Override
 	public boolean checkAndSet(final String key, final String value, long version) {
 		// FIXME needs transaction support
-		Preconditions.checkNotNull(key, "Key should be provided");
-		Preconditions.checkNotNull(value, "Value should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
+		Objects.requireNonNull(value, "Value should be provided");
 
 		final String existingValue = jedisInstance().hget(keyspaceName, key);
 
@@ -60,14 +61,14 @@ public class RedisKeyspace implements Keyspace {
 
 	@Override
 	public boolean delete(final String key) {
-		Preconditions.checkNotNull(key, "Key should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
 		return jedisInstance().hdel(keyspaceName, key) == 1;
 	}
 
 	@Override
 	public boolean deletes(final String key, final long version) {
 		// FIXME needs transaction support
-		Preconditions.checkNotNull(key, "Key should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
 
 		final String existingValue = jedisInstance().hget(keyspaceName, key);
 
@@ -84,25 +85,25 @@ public class RedisKeyspace implements Keyspace {
 
 	@Override
 	public boolean exists(final String key) {
-		Preconditions.checkNotNull(key, "Key should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
 
 		return jedisInstance().hexists(keyspaceName, key);
 	}
 
 	@Override
 	public Optional<String> get(final String key) {
-		Preconditions.checkNotNull(key, "Key should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
 
-		return Optional.fromNullable(jedisInstance().hget(keyspaceName, key));
+		return Optional.ofNullable(jedisInstance().hget(keyspaceName, key));
 	}
 
 	@Override
 	public Optional<KeyValue> gets(final String key) {
-		Preconditions.checkNotNull(key, "Key should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
 
 		final String value = jedisInstance().hget(keyspaceName, key);
 		final KeyValue keyValue = (value == null) ? null : KeyValue.create(key, value, value.hashCode());
-		return Optional.fromNullable(keyValue);
+		return Optional.ofNullable(keyValue);
 	}
 
 	private Jedis jedisInstance() {
@@ -112,8 +113,8 @@ public class RedisKeyspace implements Keyspace {
 	@Override
 	public boolean replace(final String key, final String value) {
 		// FIXME needs transaction support
-		Preconditions.checkNotNull(key, "Key should be provided");
-		Preconditions.checkNotNull(value, "Value should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
+		Objects.requireNonNull(value, "Value should be provided");
 
 		final Jedis resource = jedisInstance();
 
@@ -129,8 +130,8 @@ public class RedisKeyspace implements Keyspace {
 
 	@Override
 	public boolean set(final String key, final String value) {
-		Preconditions.checkNotNull(key, "Key should be provided");
-		Preconditions.checkNotNull(value, "Value should be provided");
+		Objects.requireNonNull(key, "Key should be provided");
+		Objects.requireNonNull(value, "Value should be provided");
 
 		jedisInstance().hset(keyspaceName, key, value);
 		return true;
