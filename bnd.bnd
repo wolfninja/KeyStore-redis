@@ -1,1 +1,1 @@
-Export-Package:  com.wolfninja.keystore.api; provide:=true, com.wolfninja.keystore.redis
+Export-Package:  com.wolfninja.keystore.redis
