@@ -8,6 +8,7 @@ import redis.clients.jedis.JedisPool;
 
 import com.wolfninja.keystore.api.Keyspace;
 
+@SuppressWarnings("javadoc")
 @Test
 public class RedisAdapterTest {
 

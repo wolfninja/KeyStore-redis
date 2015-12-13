@@ -13,8 +13,7 @@ import redis.clients.jedis.JedisPool;
  * <p>
  * Implementation uses {@link Jedis}
  * 
- * @author nick
- * @since 1.0
+ * @since 0.1
  */
 public class RedisAdapter implements KeyValueStoreAdapter {
 
@@ -24,6 +23,7 @@ public class RedisAdapter implements KeyValueStoreAdapter {
 	 * @param jedisPool
 	 *            Configured {@link JedisPool} instance, not null
 	 * @return {@link RedisAdapter} instance backed by the provided {@link JedisPool}
+	 * @since 0.1
 	 */
 	public static RedisAdapter create(final JedisPool jedisPool) {
 		return new RedisAdapter(jedisPool);
@@ -36,6 +36,7 @@ public class RedisAdapter implements KeyValueStoreAdapter {
 	 * 
 	 * @param jedisPool
 	 *            Configured {@link JedisPool} instance, not null
+	 * @since 0.1
 	 */
 	protected RedisAdapter(final JedisPool jedisPool) {
 		Objects.requireNonNull(jedisPool, "JedisPool must not be null");

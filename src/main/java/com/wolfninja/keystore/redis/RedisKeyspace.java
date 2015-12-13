@@ -1,19 +1,20 @@
 package com.wolfninja.keystore.redis;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-
 import java.util.Objects;
 import java.util.Optional;
+
+import javax.annotation.Nonnull;
 
 import com.wolfninja.keystore.api.KeyValue;
 import com.wolfninja.keystore.api.Keyspace;
 
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+
 /**
  * Keyspace implementation for Redis
  * 
- * @author nick
- * @since 1.0
+ * @since 0.1
  */
 public class RedisKeyspace implements Keyspace {
 
@@ -25,10 +26,14 @@ public class RedisKeyspace implements Keyspace {
 	 * Constructor
 	 * 
 	 * @param keyspaceName
-	 *            Keyspace name
+	 *            Keyspace name, not null
 	 * @param jedisPool
+	 *            Jedis Connection pool, not null
+	 * @since 0.1
 	 */
-	protected RedisKeyspace(String keyspaceName, JedisPool jedisPool) {
+	protected RedisKeyspace(@Nonnull final String keyspaceName, @Nonnull final JedisPool jedisPool) {
+		Objects.requireNonNull(keyspaceName, "Keyspace name should be provided");
+		Objects.requireNonNull(jedisPool, "Jedis Pool should be provided");
 		this.keyspaceName = keyspaceName;
 		this.jedisPool = jedisPool;
 	}

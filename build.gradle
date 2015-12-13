@@ -1,9 +1,19 @@
+buildscript {
+  repositories {
+    mavenCentral()
+  }
+  dependencies {
+    classpath 'biz.aQute.bnd:biz.aQute.bnd.gradle:3.0.+'
+  }
+}
+
 apply plugin: 'java'
+apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'maven'
 apply plugin: 'signing'
 
-version = '1.0.0'
+version = '0.1.0'
 group 'com.wolfninja.keystore'
 ext.packaging = 'jar'
 
@@ -17,16 +27,20 @@ def isCiBuild
 def isReleaseBuild
 
 dependencies {
-	compile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT'
-	compile 'com.google.code.findbugs:jsr305:3.0.0'
-	compile 'redis.clients:jedis:2.8.0'
-
-	testCompile 'org.testng:testng:6.8.8'
+	compile 'com.wolfninja.keystore:keystore-api:0.1.0-SNAPSHOT'
 	testCompile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT:tests@jar'
+	
+	compile 'com.google.code.findbugs:jsr305:3.0.1'
+	compile 'biz.aQute.bnd:biz.aQute.bnd.annotation:3.0.0'
+	
+	compile 'redis.clients:jedis:2.8.0'
+	
 	testCompile 'com.fiftyonred:mock-jedis:0.4.0'
-	testCompile 'org.easymock:easymock:3.3'
-	testCompile 'org.powermock:powermock-module-testng:1.6.0'
-	testCompile 'org.powermock:powermock-api-easymock:1.6.0'
+	
+	testCompile 'org.testng:testng:6.9.9'
+	testCompile 'org.easymock:easymock:3.4'
+	testCompile 'org.powermock:powermock-module-testng:1.6.4'
+	testCompile 'org.powermock:powermock-api-easymock:1.6.4'
 }
 
 sourceSets {
