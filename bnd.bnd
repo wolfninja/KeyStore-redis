@@ -1,1 +1,2 @@
-Export-Package:  com.wolfninja.keystore.redis
+-exportcontents: \
+	com.wolfninja.keystore.redis

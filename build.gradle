@@ -8,6 +8,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'jacoco'
 apply plugin: 'biz.aQute.bnd.builder'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'maven'
@@ -25,23 +26,28 @@ repositories {
 def isDevBuild
 def isCiBuild
 def isReleaseBuild
+def isSign
+def sonatypeRepoUrl
 
 dependencies {
-	compile 'com.wolfninja.keystore:keystore-api:0.1.0-SNAPSHOT'
-	testCompile 'com.wolfninja.keystore:keystore-api:1.0.0-SNAPSHOT:tests@jar'
+	compile 'com.wolfninja.keystore:keystore-api:0.1.0'
+	testCompile 'com.wolfninja.keystore:keystore-api:0.1.0:tests@jar'
 	
 	compile 'com.google.code.findbugs:jsr305:3.0.1'
 	compile 'biz.aQute.bnd:biz.aQute.bnd.annotation:3.0.0'
-	
-	compile 'redis.clients:jedis:2.8.0'
-	
-	testCompile 'com.fiftyonred:mock-jedis:0.4.0'
-	
+
+        compile 'redis.clients:jedis:2.8.0'
+
+        testCompile 'com.fiftyonred:mock-jedis:0.4.0'
+
 	testCompile 'org.testng:testng:6.9.9'
 	testCompile 'org.easymock:easymock:3.4'
 	testCompile 'org.powermock:powermock-module-testng:1.6.4'
 	testCompile 'org.powermock:powermock-api-easymock:1.6.4'
 }
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 sourceSets {
 	integration {
@@ -55,6 +61,9 @@ sourceSets {
 	}
 }
 
+task getVersion << {
+      println version
+}
 
 task integrationTest(type: Test) {
 	description = "Run integration tests (from src/integration)"
@@ -67,11 +76,6 @@ task integrationTestReport(type: TestReport) {
 	destinationDir = file("$buildDir/reports/integrationTest")
 	reportOn integrationTest.binResultsDir
 }
-integrationTestReport.shouldRunAfter integrationTest
-integrationTest.finalizedBy integrationTestReport
-
-integrationTest.useTestNG()
-test.useTestNG()
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
 	classifier = 'javadoc'
@@ -83,6 +87,15 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 }
 
+integrationTest.useTestNG()
+test.useTestNG()
+
+check.dependsOn integrationTest
+check.dependsOn integrationTestReport
+integrationTestReport.dependsOn integrationTest
+
+check.dependsOn jacocoTestReport
+
 artifacts {
 	archives jar
 
@@ -92,18 +105,77 @@ artifacts {
 
 if(hasProperty("release")) {
 	isReleaseBuild = true
+        isSign = true
+        sonatypeRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
 } else if (hasProperty("ci")) {
 	isCiBuild = true
+        isSign = true
 	version += "-SNAPSHOT"
+	sonatypeRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
 } else {
 	isDevBuild = true
 	version += "-SNAPSHOT"
 }
 
+if(isSign) {
+        signing {
+                sign configurations.archives
+        }
+} else {
+        task signArchives {
+                //NOOP
+        }
+}
+
+jacocoTestReport {
+        reports {
+                xml.enabled = true
+                html.enabled = true
+        }
+}
+
 uploadArchives {
-	repositories {
-		if(isDevBuild) {
-			mavenLocal()
-		}
-	}
+        repositories {
+                if(isDevBuild) {
+                        mavenLocal()
+                } else {
+                        mavenDeployer {
+                                if(isSign) {
+                                        beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                                }
+
+                                repository(url: sonatypeRepoUrl) {
+                                        authentication(userName: sonatypeUsername, password: sonatypePassword)
+                                }
+
+                                pom.project {
+                                        name 'KeyStore-Redis'
+                                        packaging 'jar'
+                                        description 'Redis implementation of the KeyStore API'
+                                        url 'http://github.com/wolfninja/KeyStore-redis'
+
+                                        scm {
+                                                url 'scm:git@github.com:wolfninja/KeyStore-redis.git'
+                                                connection 'scm:git@github.com:wolfninja/KeyStore-redis.git'
+                                                developerConnection 'scm:git@github.com:wolfninja/KeyStore-redis.git'
+                                        }
+
+                                        licenses {
+                                                license {
+                                                        name 'MIT License'
+                                                        url 'http://opensource.org/licenses/MIT'
+                                                        distribution 'repo'
+                                                }
+                                        }
+
+                                        developers {
+                                                developer {
+                                                        id 'nickball'
+                                                        name 'Nick Ball'
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
 }

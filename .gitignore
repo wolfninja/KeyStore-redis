@@ -3,7 +3,11 @@
 .classpath
 .project
 .orig
+*.swp
 .settings/
+/gradle.properties
+/*.pubring.gpg
+/*.secring.gpg
 Main.java
 bin/
 build/
