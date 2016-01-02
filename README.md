@@ -10,10 +10,10 @@ Redis client implementation of the [WolfNinja KeyStore abstraction API](http://g
 [![Code Coverage](https://img.shields.io/codecov/c/github/wolfninja/KeyStore-redis/develop.svg)](https://codecov.io/github/wolfninja/KeyStore-redis?branch=develop)
 
 ## Description
-Redis implementation of the KeyStore API
+Redis implementation of the KeyStore API. This implementation uses the [Jedis client library](https://github.com/xetorthio/jedis).
 
 ## Latest version
-The most recent release is KeyStore-redis 0.1.0, released December 16, 2015. Targets [KeyStore API 0.1.0](https://github.com/wolfninja/KeyStore/tree/v0.1.0)
+The most recent release is KeyStore-redis 0.1.0, released January 1, 2016. Targets [KeyStore API 0.1.0](https://github.com/wolfninja/KeyStore/tree/v0.1.0)
 
 ### Maven Central
 Releases are available via Maven Central: [com.wolfninja.keystore:keystore-redis:0.1.0](http://search.maven.org/#artifactdetails|com.wolfninja.keystore|keystore-redis|0.1.0|bundle)
@@ -40,17 +40,49 @@ dependencies {
 
 ## Usage Example
 ```java
-		// Create MemoryAdapter instance
-		final KeyValueStoreAdapter adapter = MemoryAdapter.create();
-		// Create new KeyValueStore instance
-		final KeyValueStore store = KeyValueStore.create(adapter);
-		// Get key space "myKeyspace"
-		final Keyspace keyspace = store.getKeyspace("myKeyspace");
+		// Set up Jedis pool with connection info
+		final JedisPool pool = new JedisPool("localhost", 6379);
+
+		// Optional keyspace prefix (all keyspaces key names will be prefixed with this)
+		// This allows the same keyspace name to be used across different backends (keeping API compatible),
+		// but prevent key conflict in Redis
+		final String keyspacePrefix = "kv_";
+
+		// Create adaptor, passing in pool (and optional keyspace prefix)
+		final RedisAdapter adapter = RedisAdapter.create(pool, keyspacePrefix);
+		final Keyspace keyspace = adapter.getKeyspace("mySpace");
+
+		
+		// Add a key+value pair to the keyspace
+		assert keyspace.set("test", "Hiya buddy");
+		assert keyspace.set("other", "This is a different key");
+		
+		//Check what we stored in redis
+		{
+			// Connect to redis, grab the keyspace we just created
+			// each keyspace is a separate hash (prefix + keyspace name)
+			final Map<String, String> hash = pool.getResource().hgetAll("kv_mySpace");
+			assert hash.size() == 2;
+			assert hash.get("test").equals("Hiya buddy");
+			assert hash.get("other").equals("This is a different key");
+		}
 ```
 
-## Configuration and limitations
-- No configuration required
-- This implementation supports the full API featureset
+## Configuration
+- Requires passing in a configured JedisPool instance to the RedisAdapter (see Usage example)
+
+## Limitations
+- API: This implementation supports the full API featureset
+- Note: Because Redis doesn't allow locking on individual hash keys, we currently lock on the entire Keyspace when doing transactional/non-atomic operations. If the Keyspace is otherwise modified before the transaction commits, the transaction will be rolled back. Be sure to especially check the return values on these and retry if necessary. This is tracked in [issue #1](https://github.com/wolfninja/KeyStore-redis/issues/1)
+    - Affected methods:
+        - checkAndSet
+        - deletes
+        - replace
+
+## Implementation Details
+- This backend uses a Jedis pool to connect to Redis
+- Each Keyspace is internally represented in Redis as a hash
+    - The hash name is the keyspace name (prefixed with the Keyspace prefix if provided)
 
 ## Versioning
 - This project uses [Semantic Versioning](http://semver.org/) to make release versions predictable
