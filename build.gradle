@@ -36,9 +36,9 @@ dependencies {
 	compile 'com.google.code.findbugs:jsr305:3.0.1'
 	compile 'biz.aQute.bnd:biz.aQute.bnd.annotation:3.0.0'
 
-        compile 'redis.clients:jedis:2.8.0'
+	compile 'redis.clients:jedis:2.8.0'
 
-        testCompile 'com.fiftyonred:mock-jedis:0.4.0'
+	testCompile 'com.github.kstyrc:embedded-redis:0.6'
 
 	testCompile 'org.testng:testng:6.9.9'
 	testCompile 'org.easymock:easymock:3.4'
